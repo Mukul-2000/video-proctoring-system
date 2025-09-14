@@ -1,0 +1,6 @@
+Demo video instructions:
+1. Run backend and frontend as in README.
+2. Open frontend; allow camera access.
+3. Show a phone or book to the camera — detection will log ObjectDetected events.
+4. Look away for >5 seconds to trigger FocusLost. Move out of frame >10s to trigger NoFace.
+5. After session, visit backend /report/:sessionId to fetch a simple JSON report.

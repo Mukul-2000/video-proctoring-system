@@ -1,0 +1,57 @@
+import express from 'express';
+import http from 'http';
+import { Server as IOServer } from 'socket.io';
+import mongoose from 'mongoose';
+import cors from 'cors';
+import uploadRouter from './routes/upload';
+import reportRouter from './routes/report';
+import path from 'path';
+import LogModel from './models/Log.model';
+
+const app = express();
+const server = http.createServer(app);
+const io = new IOServer(server, { cors: { origin: '*' } });
+
+app.use(cors());
+app.use(express.json());
+app.use('/upload', uploadRouter);
+app.use('/report', reportRouter);
+
+// simple health
+app.get('/health', (_, res) => res.json({ ok: true }));
+
+io.on('connection', (socket) => {
+  console.log('socket connected', socket.id);
+  socket.on('join-session', (sessionId) => {
+    socket.join(sessionId);
+  });
+  socket.on('proctor-event', async(data) => {
+    // Broadcast to clients in session; in production save to DB
+    io.to(data.sessionId).emit('event', data);
+    console.log('event', data);
+
+    try {
+      const log = new LogModel({
+        type: data.type,
+        detail: data.detail,
+        ts: data.ts || new Date(),
+        sessionId: data.sessionId,
+        candidateId: data.candidateId || null,
+      });
+
+      await log.save();
+      console.log("Log saved:", log._id);
+    } catch (err) {
+      console.error("Error saving log:", err);
+    }
+  });
+});
+
+const PORT = process.env.PORT || 4000;
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/proctor';
+
+mongoose.connect(MONGO_URI).then(() => {
+  console.log('MongoDB connected');
+}).catch(err => console.warn('MongoDB connection error', err));
+
+server.listen(PORT, () => console.log('Server listening on', PORT));
