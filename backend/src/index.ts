@@ -8,6 +8,12 @@ import reportRouter from './routes/report';
 import path from 'path';
 import LogModel from './models/Log.model';
 
+import dotenv from "dotenv";
+dotenv.config();
+
+const PORT = process.env.PORT;
+const MONGO_URI = String(process.env.MONGO_URI);
+
 const app = express();
 const server = http.createServer(app);
 const io = new IOServer(server, { cors: { origin: '*' } });
@@ -47,8 +53,6 @@ io.on('connection', (socket) => {
   });
 });
 
-const PORT = process.env.PORT || 4000;
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/proctor';
 
 mongoose.connect(MONGO_URI).then(() => {
   console.log('MongoDB connected');
