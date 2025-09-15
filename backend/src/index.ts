@@ -14,6 +14,10 @@ dotenv.config();
 const PORT = process.env.PORT || 4000;
 const MONGO_URI = String(process.env.MONGO_URI);
 
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
+
 const app = express();
 const server = http.createServer(app);
 const io = new IOServer(server, { cors: { origin: '*' } });
