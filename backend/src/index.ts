@@ -11,7 +11,7 @@ import LogModel from './models/Log.model';
 import dotenv from "dotenv";
 dotenv.config();
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 4000;
 const MONGO_URI = String(process.env.MONGO_URI);
 
 const app = express();
