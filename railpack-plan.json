@@ -1,8 +1,8 @@
 {
-    "$schema": "https://railpack.com/schemas/v1.json",
     "services": {
       "backend": {
         "root": "backend",
+        "builder": "Node",
         "build": {
           "command": "npm install && npm run build"
         },
