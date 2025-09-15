@@ -11,6 +11,11 @@ import LogModel from './models/Log.model';
 import dotenv from "dotenv";
 dotenv.config();
 
+process.on('uncaughtException', (err) => console.error('Uncaught Exception:', err));
+process.on('unhandledRejection', (reason, promise) =>
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason)
+);
+
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
 }
