@@ -1,0 +1,15 @@
+{
+    "$schema": "https://railpack.com/schemas/v1.json",
+    "services": {
+      "backend": {
+        "root": "backend",
+        "build": {
+          "command": "npm install && npm run build"
+        },
+        "start": {
+          "command": "npm run start"
+        }
+      }
+    }
+  }
+  
