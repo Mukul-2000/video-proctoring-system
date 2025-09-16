@@ -34,7 +34,7 @@ app.use('/upload', uploadRouter);
 app.use('/report', reportRouter);
 
 // simple health
-app.get('/health', (_, res) => res.json({ ok: true }));
+app.get('/health', (_, res) => res.status(200).json({ ok: true }));
 
 io.on('connection', (socket) => {
   console.log('socket connected', socket.id);
