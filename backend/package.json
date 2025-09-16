@@ -4,9 +4,11 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
-    "build": "tsc --skipLibCheck --noEmit false",
-    "start": "node dist/index.js"
-  },
+    "build": "tsc --skipLibCheck",
+    "start": "node dist/index.js",
+    "postinstall": "npm run build"
+  }
+  ,
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
