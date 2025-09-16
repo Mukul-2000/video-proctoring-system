@@ -5,12 +5,12 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import uploadRouter from './routes/upload';
 import reportRouter from './routes/report';
-import path from 'path';
 import LogModel from './models/Log.model';
+import dotenv from 'dotenv';
 
-import dotenv from "dotenv";
 dotenv.config();
 
+// Handle uncaught exceptions and unhandled promise rejections
 process.on('uncaughtException', (err) => console.error('Uncaught Exception:', err));
 process.on('unhandledRejection', (reason, promise) =>
   console.error('Unhandled Rejection at:', promise, 'reason:', reason)
@@ -23,33 +23,38 @@ if (process.env.NODE_ENV !== 'production') {
 const PORT = parseInt(process.env.PORT || '4000', 10);
 const MONGO_URI = String(process.env.MONGO_URI);
 
-
 const app = express();
 const server = http.createServer(app);
 const io = new IOServer(server, { cors: { origin: '*' } });
 
+// Middlewares
 app.use(cors());
 app.use(express.json());
+
+// Request logger
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
   next();
 });
 
+// Routes
 app.use('/upload', uploadRouter);
 app.use('/report', reportRouter);
 
-// simple health
+// Healthcheck endpoint
 app.get('/health', (_, res) => res.status(200).json({ ok: true }));
 
+// Socket.io
 io.on('connection', (socket) => {
-  console.log('socket connected', socket.id);
+  console.log('Socket connected:', socket.id);
+
   socket.on('join-session', (sessionId) => {
     socket.join(sessionId);
   });
-  socket.on('proctor-event', async(data) => {
-    // Broadcast to clients in session; in production save to DB
+
+  socket.on('proctor-event', async (data) => {
     io.to(data.sessionId).emit('event', data);
-    console.log('event', data);
+    console.log('Proctor event received:', data);
 
     try {
       const log = new LogModel({
@@ -59,18 +64,29 @@ io.on('connection', (socket) => {
         sessionId: data.sessionId,
         candidateId: data.candidateId || null,
       });
-
       await log.save();
-      console.log("Log saved:", log._id);
+      console.log('Log saved:', log._id);
     } catch (err) {
-      console.error("Error saving log:", err);
+      console.error('Error saving log:', err);
     }
   });
 });
 
+// Start server safely
+async function startServer() {
+  try {
+    console.log('Starting server...');
 
-mongoose.connect(MONGO_URI).then(() => {
-  console.log('MongoDB connected');
-}).catch(err => console.warn('MongoDB connection error', err));
+    await mongoose.connect(MONGO_URI);
+    console.log('MongoDB connected');
 
-server.listen(PORT, '0.0.0.0', () => console.log('Server listening on', PORT));
+    server.listen(PORT, '0.0.0.0', () => {
+      console.log(`Server listening on port ${PORT}`);
+    });
+  } catch (err) {
+    console.error('Failed to start server:', err);
+    // Optionally keep retrying or exit gracefully
+  }
+}
+
+startServer();
