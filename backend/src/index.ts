@@ -20,7 +20,7 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
 }
 
-const PORT = process.env.PORT || 4000;
+const PORT = parseInt(process.env.PORT || '4000', 10);
 const MONGO_URI = String(process.env.MONGO_URI);
 
 
@@ -68,4 +68,4 @@ mongoose.connect(MONGO_URI).then(() => {
   console.log('MongoDB connected');
 }).catch(err => console.warn('MongoDB connection error', err));
 
-server.listen(PORT, () => console.log('Server listening on', PORT));
+server.listen(PORT, '0.0.0.0', () => console.log('Server listening on', PORT));
