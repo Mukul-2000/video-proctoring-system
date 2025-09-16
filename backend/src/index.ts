@@ -90,3 +90,20 @@ async function startServer() {
 }
 
 startServer();
+
+// --- Graceful shutdown handlers ---
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received. Gracefully shutting down...');
+  server.close(() => {
+    console.log('HTTP server closed');
+    mongoose.disconnect().then(() => {
+      console.log('MongoDB disconnected');
+      process.exit(0);
+    });
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log('SIGINT received. Exiting...');
+  process.exit(0);
+});
