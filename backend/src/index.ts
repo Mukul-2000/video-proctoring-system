@@ -6,9 +6,7 @@ import cors from 'cors';
 import uploadRouter from './routes/upload';
 import reportRouter from './routes/report';
 import LogModel from './models/Log.model';
-import dotenv from 'dotenv';
 
-dotenv.config();
 
 // Handle uncaught exceptions and unhandled promise rejections
 process.on('uncaughtException', (err) => console.error('Uncaught Exception:', err));
@@ -16,11 +14,7 @@ process.on('unhandledRejection', (reason, promise) =>
   console.error('Unhandled Rejection at:', promise, 'reason:', reason)
 );
 
-if (process.env.NODE_ENV !== 'production') {
-  require('dotenv').config();
-}
-
-const PORT = parseInt(process.env.PORT || '4000', 10);
+const PORT = parseInt(process.env.PORT!, 10);
 const MONGO_URI = String(process.env.MONGO_URI);
 
 const app = express();
@@ -42,7 +36,7 @@ app.use('/upload', uploadRouter);
 app.use('/report', reportRouter);
 
 // Healthcheck endpoint
-app.get('/health', (_, res) => res.status(200).json({ ok: true }));
+app.get('/health', (_, res) => res.sendStatus(200));
 
 // Socket.io
 io.on('connection', (socket) => {
@@ -93,7 +87,7 @@ startServer();
 
 // --- Graceful shutdown handlers ---
 process.on('SIGTERM', () => {
-  console.log('SIGTERM received. Gracefully shutting down...');
+  console.log('SIGTERM received: container is being stopped');
   server.close(() => {
     console.log('HTTP server closed');
     mongoose.disconnect().then(() => {
@@ -101,9 +95,4 @@ process.on('SIGTERM', () => {
       process.exit(0);
     });
   });
-});
-
-process.on('SIGINT', () => {
-  console.log('SIGINT received. Exiting...');
-  process.exit(0);
 });
